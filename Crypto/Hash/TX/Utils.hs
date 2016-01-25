@@ -9,6 +9,7 @@ import Data.SafeCopy                        (SafeCopy(..), contain, safeGet, saf
 import Database.Persist                     (PersistField(..))
 import Database.Persist.Sql                 (PersistFieldSql(..), SqlType(..))
 import Data.Byteable                        (Byteable(..))
+import Data.Binary                          (Binary(..))
 
 
 newtype MD5Hash = MD5Hash { unMD5Hash :: ByteString }
@@ -31,6 +32,9 @@ instance Byteable MD5Hash where
     byteableLength (MD5Hash x) = byteableLength x
     withBytePtr (MD5Hash x) f = withBytePtr x f
 
+instance Binary MD5Hash where
+    put (MD5Hash x) = put x
+    get = MD5Hash <$> get
 
 newtype SHA256Hash = SHA256Hash { unSHA256Hash :: ByteString }
                 deriving (Show, Eq, Ord)
@@ -51,6 +55,11 @@ instance Byteable SHA256Hash where
     toBytes (SHA256Hash x) = toBytes x
     byteableLength (SHA256Hash x) = byteableLength x
     withBytePtr (SHA256Hash x) f = withBytePtr x f
+
+instance Binary SHA256Hash where
+    put (SHA256Hash x) = put x
+    get = SHA256Hash <$> get
+
 
 md5HashFile :: FilePath -> IO MD5Hash
 md5HashFile = fmap md5HashLBS . LB.readFile
