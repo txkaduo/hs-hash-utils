@@ -1,5 +1,11 @@
-module Crypto.Hash.TX.Utils where
+module Crypto.Hash.TX.Utils
+  ( MD5Hash(..)
+  , SHA256Hash(..)
+  , md5HashFile, md5HashBS, md5HashLBS
+  , sha256HashFile, sha256HashBS, sha256HashLBS
+  ) where
 
+-- {{{1 imports
 import Prelude
 import qualified Crypto.Hash.MD5            as MD5
 import qualified Crypto.Hash.SHA256         as SHA256
@@ -10,6 +16,7 @@ import Database.Persist                     (PersistField(..))
 import Database.Persist.Sql                 (PersistFieldSql(..), SqlType(..))
 import Data.Byteable                        (Byteable(..))
 import Data.Binary                          (Binary(..))
+-- }}}1
 
 
 newtype MD5Hash = MD5Hash { unMD5Hash :: ByteString }
@@ -36,6 +43,17 @@ instance Binary MD5Hash where
     put (MD5Hash x) = put x
     get = MD5Hash <$> get
 
+
+md5HashFile :: FilePath -> IO MD5Hash
+md5HashFile = fmap md5HashLBS . LB.readFile
+
+md5HashLBS :: LB.ByteString -> MD5Hash
+md5HashLBS = MD5Hash . MD5.hashlazy
+
+md5HashBS :: ByteString -> MD5Hash
+md5HashBS = MD5Hash . MD5.hash
+
+
 newtype SHA256Hash = SHA256Hash { unSHA256Hash :: ByteString }
                 deriving (Show, Eq, Ord)
 
@@ -61,15 +79,6 @@ instance Binary SHA256Hash where
     get = SHA256Hash <$> get
 
 
-md5HashFile :: FilePath -> IO MD5Hash
-md5HashFile = fmap md5HashLBS . LB.readFile
-
-md5HashLBS :: LB.ByteString -> MD5Hash
-md5HashLBS = MD5Hash . MD5.hashlazy
-
-md5HashBS :: ByteString -> MD5Hash
-md5HashBS = MD5Hash . MD5.hash
-
 sha256HashFile :: FilePath -> IO SHA256Hash
 sha256HashFile = fmap sha256HashLBS . LB.readFile
 
@@ -78,3 +87,6 @@ sha256HashLBS = SHA256Hash . SHA256.hashlazy
 
 sha256HashBS :: ByteString -> SHA256Hash
 sha256HashBS = SHA256Hash . SHA256.hash
+
+
+-- vim: set foldmethod=marker:
